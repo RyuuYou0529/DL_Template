@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
+import os, shutil
+import tarfile
+
 
 def checkdir(path, reset = True):
-
-    import os, shutil
-
     if os.path.exists(path):
         if reset:
             shutil.rmtree(path)
@@ -24,9 +25,6 @@ def checkdir(path, reset = True):
         os.makedirs(path)
 
 def extract(file, path):
-	
-    import tarfile
-
     if file.endswith("tar.gz"):
         tar = tarfile.open(file, "r:gz")
         tar.extractall(path = path)
@@ -37,25 +35,20 @@ def extract(file, path):
         tar.close()
 
 def read_file(file, encoding="ASCII"):
-
     if file.endswith(".pkl"):
         import pickle
         with open(file, 'rb') as f:
             d = pickle.load(f, encoding=encoding)
-
     elif file.endswith(".json"):
         import json
         with open(file, 'rb') as f:
             d = json.load(f)
-
     return d
 
 def write_file(d, file):
-
     if file.endswith(".pkl"):
         import joblib
         joblib.dump(d, file)
-
     elif file.endswith(".json"):
         import json
         with open(file, 'w') as f:

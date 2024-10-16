@@ -26,7 +26,6 @@ from pathlib import Path
 
 
 def parse_args():
-
     parser = argparse.ArgumentParser(description='Template')
 
     # === PATHS === #
@@ -61,16 +60,9 @@ def parse_args():
     parser.add_argument('-arch', type=str, default = 'mlp',
                                             help='Architecture to choose')
 
-    # === Trainer === #
-    parser.add_argument('-trainer', type=str, default = 'trainer',
-                                            help='Trainer to choose')
-    parser.add_argument('-epochs', type=int, default = 100,
-                                            help='number of epochs')
-    parser.add_argument('-save_every', type=int, default = 10,
-                                            help='Save frequency')
-    parser.add_argument('-fp16', action='store_true',
-                                            help='Use mixed precision only with RTX, V100 and A100 GPUs')
-
+    # === Loss === #
+    parser.add_argument('-loss', type=str, default = 'loss',
+                                            help='Loss function to choose')
 
     # === Optimization === #
     parser.add_argument('-optimizer', type=str, default = 'adam',
@@ -81,9 +73,19 @@ def parse_args():
                                             help='Final Learning Rate')
     parser.add_argument('-lr_warmup', type=int, default = 10,
                                             help='warmup epochs for learning rate')
+    
+    # === Trainer === #
+    parser.add_argument('-trainer', type=str, default = 'trainer',
+                                            help='Trainer to choose')
+    parser.add_argument('-epochs', type=int, default = 100,
+                                            help='number of epochs')
+    parser.add_argument('-save_every', type=int, default = 10,
+                                            help='Save frequency')
+    parser.add_argument('-fp16', action='store_true',
+                                            help='Use mixed precision only with RTX, V100 and A100 GPUs')
 
     # === SLURM === #
-    parser.add_argument('-slurm', action='store_true',
+    parser.add_argument('-slurm', action='store_true', default=False,
                                             help='Submit with slurm')
     parser.add_argument('-slurm_ngpus', type=int, default = 8,
                                             help='num of gpus per node')
@@ -125,12 +127,10 @@ class SLURM_Trainer(object):
 
 
 def main():
-
     args = parse_args()
     args.port = random.randint(49152,65535)
     
     if args.slurm:
-
         # Almost copy-paste from https://github.com/facebookresearch/deit/blob/main/run_with_submitit.py
         args.output_dir = get_shared_folder(args) / "%j"
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
@@ -161,12 +161,11 @@ def main():
 	
 
 def train(gpu, args):
-
     # === SET ENV === #
     init_dist_gpu(gpu, args)
     
     # === DATA === #
-    get_dataset = getattr(__import__("lib.datasets.{}".format(args.dataset), fromlist=["get_dataset"]), "get_dataset")
+    get_dataset = getattr(__import__("lib.dataset.{}".format(args.dataset), fromlist=["get_dataset"]), "get_dataset")
     dataset = get_dataset(args)
 
     sampler = DistributedSampler(dataset, shuffle=args.shuffle, num_replicas = args.world_size, rank = args.rank, seed = 31)
@@ -186,15 +185,15 @@ def train(gpu, args):
     model = nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
 
     # === LOSS === #
-    from lib.core.loss import get_loss
-    loss = get_loss(args).cuda(args.gpu)
+    get_loss = getattr(__import__("lib.loss.{}".format(args.arch), fromlist=["get_loss"]), "get_loss")
+    loss = get_loss(args, model).cuda(args.gpu)
 
     # === OPTIMIZER === #
     from lib.core.optimizer import get_optimizer
     optimizer = get_optimizer(model, args)
 
     # === TRAINING === #
-    Trainer = getattr(__import__("lib.trainers.{}".format(args.trainer), fromlist=["Trainer"]), "Trainer")
+    Trainer = getattr(__import__("lib.trainer.{}".format(args.trainer), fromlist=["Trainer"]), "Trainer")
     Trainer(args, loader, model, loss, optimizer).fit()
 
 

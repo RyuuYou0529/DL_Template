@@ -1,5 +1,5 @@
 import torch
-import os, random
+import os
 import numpy as np
 import torch.distributed as dist
 import torch.backends.cudnn as cudnn
@@ -54,9 +54,7 @@ def get_shared_folder(args) -> Path:
 
 
 def init_dist_node(args):
-
     if 'SLURM_JOB_ID' in os.environ:
-
         args.ngpus_per_node = torch.cuda.device_count()
 
         # requeue job on SLURM preemption
@@ -74,7 +72,6 @@ def init_dist_node(args):
         args.world_size = int(os.getenv('SLURM_NNODES')) * args.ngpus_per_node
             
     else:
-
         os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
         args.ngpus_per_node = torch.cuda.device_count()
 
@@ -83,7 +80,6 @@ def init_dist_node(args):
         args.world_size = args.ngpus_per_node
 
 def init_dist_gpu(gpu, args):
-
     if args.slurm:
         job_env = submitit.JobEnvironment()
         args.output_dir = Path(str(args.output_dir).replace("%j", str(job_env.job_id)))
@@ -120,7 +116,6 @@ class SmoothedValue(object):
     """Track a series of values and provide access to smoothed values over a
     window or the global series average.
     """
-
     def __init__(self, window_size=20, fmt=None):
         if fmt is None:
             fmt = "{median:.6f} ({global_avg:.6f})"

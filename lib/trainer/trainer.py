@@ -19,12 +19,14 @@ from lib.core.scheduler import cosine_scheduler
 from lib.utils.distributed import MetricLogger
 from glob import glob
 import math
+import pprint
 
 import sys
 
 class Trainer:
 
     def __init__(self, args, loader, model, loss, optimizer):
+        pprint.pprint(vars(args))
 
         self.args = args
         self.train_gen = loader

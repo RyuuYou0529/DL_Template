@@ -1,11 +1,27 @@
+import torch
 import torch.optim as Opt
 
-def get_optimizer(model, args):
+class Adam_Opt(Opt.Adam):
+    def __init__(self, model:torch.nn.Module, args):
+        lr_start = args.lr_start
+        super(Adam_Opt, self).__init__(model.parameters(), lr=lr_start)
 
+class SGD_Opt(Opt.SGD):
+    def __init__(self, model:torch.nn.Module, args):
+        lr_start = args.lr_start
+        super(SGD_Opt, self).__init__(model.parameters(), lr=lr_start)
+
+class Adagrad_Opt(Opt.Adagrad):
+    def __init__(self, model:torch.nn.Module, args):
+        lr_start = args.lr_start
+        super(Adagrad_Opt, self).__init__(model.parameters(), lr=lr_start)
+
+def get_optimizer(args, model):
     opt_fns = {
-        'adam': Opt.Adam(model.parameters(), lr = args.lr_start),
-        'sgd': Opt.SGD(model.parameters(), lr = args.lr_start),
-        'adagrad': Opt.Adagrad(model.parameters(), lr = args.lr_start)
+        'adam': Adam_Opt,
+        'sgd': SGD_Opt,
+        'adagrad': Adagrad_Opt,
     }
-
-    return opt_fns.get(args.optimizer, "Invalid Optimizer")
+    opt_fn = opt_fns.get(args.optimizer, "Invalid Optimizer")
+    opt = opt_fn(model.module, args)
+    return opt
