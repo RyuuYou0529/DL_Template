@@ -11,6 +11,5 @@ class Loss(nn.Module):
         loss = self.loss_fn(preds, labels)
         return loss
 
-
 def get_loss(args, model=None):
     return Loss(args)

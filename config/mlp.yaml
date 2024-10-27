@@ -1,0 +1,17 @@
+# common
+arch: mlp
+optimizer: adam
+loss: loss
+dataset: random
+trainer: trainer
+
+# model
+
+# data
+data: ''
+
+# loss
+
+# optimizer
+# lr_start: 5e-4
+# lr_end: 1e-6

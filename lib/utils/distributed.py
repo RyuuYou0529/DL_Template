@@ -34,9 +34,6 @@ def setup_for_distributed(is_master):
     __builtin__.print = print
 
 def fix_random_seeds(seed=31):
-    """
-    Fix random seeds.
-    """
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
@@ -45,13 +42,6 @@ def get_shared_folder(args) -> Path:
     slurm_log_path = os.path.join(args.out, 'slurm')
     checkdir(slurm_log_path, False)
     return Path(slurm_log_path)
-    # user = os.getenv("USER")
-    # if Path("/data/sarkar-vision/slurm_jobs/").is_dir():
-    #     p = Path(f"/data/sarkar-vision/slurm_jobs/{user}")
-    #     p.mkdir(exist_ok=True)
-    #     return p
-    # raise RuntimeError("No shared folder available")
-
 
 def init_dist_node(args):
     if 'SLURM_JOB_ID' in os.environ:

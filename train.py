@@ -185,12 +185,12 @@ def train(gpu, args):
     model = nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
 
     # === LOSS === #
-    get_loss = getattr(__import__("lib.loss.{}".format(args.arch), fromlist=["get_loss"]), "get_loss")
+    get_loss = getattr(__import__("lib.loss.{}".format(args.loss), fromlist=["get_loss"]), "get_loss")
     loss = get_loss(args, model).cuda(args.gpu)
 
     # === OPTIMIZER === #
     from lib.core.optimizer import get_optimizer
-    optimizer = get_optimizer(model, args)
+    optimizer = get_optimizer(args, model)
 
     # === TRAINING === #
     Trainer = getattr(__import__("lib.trainer.{}".format(args.trainer), fromlist=["Trainer"]), "Trainer")

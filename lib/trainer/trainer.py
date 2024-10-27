@@ -37,21 +37,16 @@ class Trainer:
 
         # === TB writers === #
         if self.args.main:	
-
             self.writer = get_writer(args)
             self.lr_sched_writer = TBWriter(self.writer, 'scalar', 'Schedules/Learning Rate')			
             self.loss_writer = TBWriter(self.writer, 'scalar', 'Loss/total')
-
             checkdir("{}/weights/{}/".format(args.out, self.args.model), args.reset)
 
-
     def train_one_epoch(self, epoch, lr_schedule):
-
         metric_logger = MetricLogger(delimiter="  ")
         header = 'Epoch: [{}/{}]'.format(epoch, self.args.epochs)
 
         for it, (input_data, labels) in enumerate(metric_logger.log_every(self.train_gen, 10, header)):
-
             # === Global Iteration === #
             it = len(self.train_gen) * epoch + it
 
@@ -95,9 +90,7 @@ class Trainer:
         metric_logger.synchronize_between_processes()
         print("Averaged stats:", metric_logger)
 
-
     def fit(self):
-
         # === Resume === #
         self.load_if_available()
 
@@ -121,7 +114,6 @@ class Trainer:
                 self.save(epoch)
 
     def load_if_available(self):
-
         ckpts = sorted(glob(f'{self.args.out}/weights/{self.args.model}/Epoch_*.pth'))
 
         if len(ckpts) >0:
@@ -138,7 +130,6 @@ class Trainer:
 
 
     def save(self, epoch):
-
         if self.args.fp16:
             state = dict(epoch=epoch+1, 
                             model=self.model.state_dict(), 

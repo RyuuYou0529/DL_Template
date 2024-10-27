@@ -13,14 +13,12 @@
 # limitations under the License.
 
 from torch.utils.tensorboard import SummaryWriter
-from tensorboard import program
 from lib.utils.file import checkdir
 import pprint, re, os
 
 import pandas as pd
 
 def get_writer(args):
-
     path = "{}/logs/{}".format(args.out, args.model)
     checkdir(path, args.reset)
 
@@ -47,9 +45,7 @@ def get_writer(args):
 
 
 class TBWriter(object):
-
     def __init__(self, writer, data_type, tag, mul = 1, add = 0, fps = 4):
-
         self.step = 0
         self.mul = mul
         self.add = add
@@ -60,7 +56,6 @@ class TBWriter(object):
         self.tag = tag
 
     def __call__(self, data, step = None, flush = False):
-
         counter = step if step != None else self.step*self.mul+self.add
 
         if self.type == 'scalar':
